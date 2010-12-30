@@ -57,12 +57,12 @@ Open the file "options.cfg"
 ****************************************
 6) test it out
 ****************************************
-get python script "exompp_serialgw.py" and "options.cfg"
+get python script "pc_serial_gateway.py"
 --) attach a compatible device to a/the serial port
---) run the script (> python exompp_serialgw.py)
+--) run the script (> python pc_serial_gateway.py)
 --) verify the app connects to both the device and Exosite (no errors 
     should be generated)
---) log into one.exosite.com and verify the data source is created and 
+--) log into portals.exosite.com and verify the data source is created and 
 	that data was generated
 
 ****************************************
