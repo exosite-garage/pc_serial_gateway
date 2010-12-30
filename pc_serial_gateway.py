@@ -39,6 +39,8 @@ import ConfigParser
 import serial
 import threading
 
+PASSPHRASE = 'exositegateway'
+PASSPHRASERESPONSE = 'exositemasternode'
 HEADER = '12345678\x0D\x0A'
 FOOTER = '87654321\x0D\x0A'
 kill_threads = False
@@ -52,7 +54,7 @@ def main():
   
   ##setup node communications
   try:
-    node = GatewayNodeIO(serialport)
+    node = GatewayNodeIO(serialport,PASSPHRASE,PASSPHRASERESPONSE)
   except:
     print "Problem with connecting to node. Check config file port_name"
     try:
@@ -102,7 +104,9 @@ def main():
 class GatewayNodeIO():
 #===============================================================================
 #-------------------------------------------------------------------------------
-  def __init__(self, portsettings):
+  def __init__(self, portsettings, passphrase, phraseresponse):
+    self.passphrase = passphrase
+    self.phraseresponse = phraseresponse
     self.portname = portsettings['port_name']
     self.portbaud = int(portsettings['baud_rate'])
     try:  
@@ -138,14 +142,14 @@ class GatewayNodeIO():
     self.s.writeTimeout = None
     self.s.dsrdtr = False
     self.s.interCharTimeout = None   
-    #if we are talking to a valid master node, it will recognize the passphrase
+    #if we are talking to a valid node, it will recognize the passphrase
     # and will send back the phraseresponse.
-    passphrase = 'exositegateway'
-    phraseresponse = 'exositemasternode'
-    self.writePort(passphrase)
-    if self.readPort(len(phraseresponse)) != phraseresponse: 
-      print "Non valid discovery response received: %s" % response
-      return -1
+    if '' != self.passphrase:
+      self.writePort(self.passphrase)
+      response = self.readPort(len(self.phraseresponse))
+      if response != self.phraseresponse: 
+        print "Non valid serial response received: %s" % repr(response)
+        return -1
 
 #-------------------------------------------------------------------------------
   def closeNode(self):
