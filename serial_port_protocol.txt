@@ -1,0 +1,20 @@
+pc_serial_gateway serial port protocol
+
+This text document specifies the serial port protocol between a gateway device
+that is connected to the internet(e.g. a PC running this python script) and a 
+device sending information to the gateway device over the serial port 
+
+Read Packet (Serial Device to Gateway)
+  Header (9 bytes): '12345678\x0D\x0A'
+  Device Name: 0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Resource Name: 0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Value:  0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Footer: '87654321\x0D\x0A'
+
+Write Packet (Gateway to Serial Device)
+  Header (9 bytes): '12345678\x0D\x0A'
+  Device Name: 0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Command:  0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Value:  0xAA..0xAA 0x0A 0x0D (N ASCII bytes, CR, LF)
+  Footer: '87654321\x0D\x0A'
+
