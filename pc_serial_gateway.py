@@ -55,6 +55,7 @@ def main():
   ## read node connection info from config file   
   cfg_filepath = os.path.join(os.getcwd(),'options.cfg')  
   serialport = getconfiguration(cfg_filepath,'Node_Connection',1)
+  connection = getconfiguration(cfg_filepath,'Exosite_Connection',1)
   
   ##setup node communications
   try:
@@ -75,28 +76,23 @@ def main():
   # Implement mutexes/critical sections/interlocked inc/dec in certain areas
   # Use subscriber list to do a lookup/refresh of the local list of device
   # names to CIK pairings
-  publish = PublishToExosite(cfg_filepath)
+  publish = PublishToExosite(connection)
   publish.start()
-  
-  devices = getconfiguration(cfg_filepath,'Devices',1)
+
   while False == kill_threads:
     validpacket = True
     # find a header
     node.findHeader()
     # read the packet
-    device_name, validpacket = node.readLine()
+    device_cik, validpacket = node.readLine()
     if validpacket: res_name, validpacket = node.readLine()
     if validpacket: res_value, validpacket = node.readLine()
     # verify footer
     if validpacket: validpacket = node.findFooter()
     if validpacket:
-      device_name = device_name.strip().lower()
+      device_cik = device_cik.strip().lower()
       res_name = res_name.strip()
-      # at this point, our packet components are good to go.  stuff them in a 
-      # buffer and start reading again
-      for k, v in devices.iteritems():
-        if k == device_name: cik = v
-      publish.addData(cik, res_name, res_value)
+      publish.addData(device_cik, res_name, res_value)
   
   node.closeNode()
   
@@ -105,12 +101,30 @@ def main():
   return
 
 #===============================================================================
+def getconfiguration(cfg_filepath, section, printvalues):
+#===============================================================================
+  config = ConfigParser.RawConfigParser()
+  config.read(cfg_filepath)
+  config_list = {}
+  if printvalues:
+    print "======================"
+    print "%s Settings:" % section
+    print "======================"
+  for option in config.options(section):
+    config_list[option] = config.get(section, option)
+    if printvalues: print "%s: %s" % (option,config_list[option])
+  if printvalues:
+    print "======================"
+    print "\n"
+  return config_list
+
+#===============================================================================
 class GatewayNodeIO():
 #===============================================================================
 #-------------------------------------------------------------------------------
   def __init__(self, portsettings, passphrase, phraseresponse):
-    self.passphrase = passphrase
-    self.phraseresponse = phraseresponse
+    self.passphrase = PASSPHRASE
+    self.phraseresponse = PASSPHRASERESPONSE
     self.portname = portsettings['port_name']
     self.portbaud = int(portsettings['baud_rate'])
     try:  
